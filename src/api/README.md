@@ -21,7 +21,11 @@ docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate \
                 -i /local/openapi.json \
                 -p litepolis_client \
                 -g <target-tech> \
-                -o /local/generated
+                -o /local/generated \
+                --additional-properties=packageName=litepolis_client,packageVersion=0.0.2
 ```
 > ℹ️ Change `<target-tech>` to `python`, `typescript-axios`, `android`
 > or other target technology you want to support
+>
+> `additional-properties` defines the name and version of the generated client.
+> It will be `openapi-client` by default which will cause problem later in development.
