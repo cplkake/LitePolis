@@ -29,3 +29,5 @@ docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate \
 >
 > `additional-properties` defines the name and version of the generated client.
 > It will be `openapi-client` by default which will cause problem later in development.
+
+It is difficult to figure out how to use the client SDK. I am heavily relay on `doc/*.md` generated with the SDK
