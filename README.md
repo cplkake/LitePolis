@@ -130,8 +130,7 @@ then been accessed by other UI widget through other API endpoints
 ```
 *storage: Such as Amazon S3, Google Cloud Storage, Azure Blob Storage, and other S3-compatible storage
 
-Access control is provided by `Streamlit-Authenticator`
-The flow and vulnerability of streamlit-Auth
+The `Streamlit` is just a placeholder and a test UI for development, `FastAPI` can generate SDK in `Python`, `Android` and `TypeScript` using OpenAPI generator. And the `FastAPI-_R__` will be replaced by an API gateway to allow people implement different ways to analyzing data in the `StarRock` datalake and serve through Micro Service architecture and access through RESTful API URL standard.
 
 ### Detailed docs
 - [API docs](https://github.com/NewJerseyStyle/LitePolis/tree/release/doc/api)
