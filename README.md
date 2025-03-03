@@ -8,29 +8,53 @@ enabled by advanced statistics and machine learning.
 
 LitePolis is a Python-based, developer-friendly iteration of [Polis](https://github.com/compdemocracy/polis),
 designed to provide a scalable and flexible platform for data scientists and developers.
-Our goal is to make it easy to build and deploy data-driven applications with ease.
+Our goal is to make it easy to build and deploy data-driven applications giving more flexibility to the community.
 
-**Overview**
+## Overview
 
-LitePolis is a refactored version of [Polis](https://github.com/compdemocracy/polis),
-built using Python and optimized for scalability and performance.
-We've incorporated a data lakehouse using [StarRocks](https://www.starrocks.io/),
-a powerful and scalable analytics engine,
-and adopted a Model-View-Controller
-([MVC architecture](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller))
-architecture to ensure seamless integration and flexibility.
+LitePolis is a modular Python-based system, refactored from [Polis](https://github.com/compdemocracy/polis), designed for scalability and performance.  It uses a microservice-like architecture for flexibility and integration. This repository acts as the central package manager, orchestrating the integration of various components for deployment.  The package manager automatically discovers and manages routers (APIs), middleware, and UI packages, including dependency resolution. Database interactions are handled as a router (API). Future development will include Docker SDK support for managing dependencies like database servers.
 
-**Scalability at its Core**
+Routers and middleware can be developed independently in separate repositories and integrated during deployment based on the dependencies declared by UI packages.  This allows for a highly modular and extensible system.
 
-Our MVC architecture enables horizontal scaling at all three levels,
-making it easy to add new features and support large-scale applications:
+```mermaid
+graph LR
+    A[LitePolis Core] --> B(Package Manager);
+    B --> C{Routers (APIs)};
+    B --> D{Middlewares};
+    B --> E{UI Packages};
+    C --> F[Database Access (as a Router/API)];
+    F -.-> G[Auto pull Docker (Future)];
+    E --> H[Static Files];
+```
 
-* **Controller**: Scale your application by developing and distributing client-side web or mobile applications using our RESTful API.
-* **View**: Scale your views by horizontally scaling Docker instances and adding load balancing to your infrastructure.
-* **Model**: Scale your data processing by adjusting the number of StarRocks instances using [Kubernetes](https://github.com/StarRocks/starrocks-kubernetes-operator/tree/main/examples/starrocks) on cloud infrastructure.
+**Routers, UI Packages, and Middlewares**
 
-This flexible architecture allows you to focus on building your application, while we handle the scalability and performance.
+In LitePolis, these components play distinct roles, though their relationship to traditional MVC might not be a direct mapping due to the distributed nature of the system:
 
+* **Routers (APIs):** These are analogous to *Controllers* in a traditional MVC framework. They define the endpoints and logic for handling incoming requests and returning responses.  They act as the entry point for all interactions with the system.  A database interaction is handled *through* a router, meaning a dedicated router is responsible for communicating with the database. The database itself, along with the data processing logic, represents the *Model* in this context.
+
+* **UI Packages:** These are closer to the *View* component of MVC. They consume the APIs exposed by the routers to present data and interact with the user.  While they might contain some control logic, their primary function is to render the user interface and handle user interactions.  They then communicate these interactions back to the routers.
+
+* **Middlewares:** These components sit between the routers and the UI, acting as intermediaries. They handle cross-cutting concerns like authentication, authorization, logging, and rate limiting.  They are not directly tied to the MVC paradigm but are essential for managing access control, security, and other system-wide functionalities.  Thinking of them as handling access control is a reasonable simplification.
+
+**Scalability and Infrastructure**
+
+LitePolis is designed for scalability and can handle high-volume usage through horizontal scaling:
+
+* **Routers/APIs (Controllers):**  Multiple instances of the API servers can be deployed and managed by a load balancer to distribute traffic and ensure high availability. LitePolis support autoscaling on cloud platforms like Google Cloud out-of-box.
+* **UI Packages (Views):**  Static files for the UI can be served from a content delivery network (CDN) to minimize latency and improve performance. The UI itself can be designed to be stateless, allowing for easy horizontal scaling of the application servers.
+* **Model (Database and Data Processing):**  LitePolis leverages distributed databases and data processing systems (like [StarRocks on Kubernetes](https://github.com/StarRocks/starrocks-kubernetes-operator/tree/main/examples/starrocks)) that can scale horizontally to handle increasing data volumes and query loads.
+
+This distributed architecture, combined with cloud infrastructure and autoscaling, allows LitePolis to adapt to varying levels of demand and maintain performance even under heavy load, enabling nation-wide high-volume usage.
+
+## Conclusion
+
+This flexible architecture, coupled with a central package manager, simplifies the development process.  Developers can focus on building their applications (routers, middleware, UI) while LitePolis handles the underlying infrastructure for scalability and performance.  This separation of concerns allows for rapid development and deployment of new features and functionalities.
+
+
+
+
+# TODOs
 ## Features
 
 * [ ] **Real-time Sentiment Gathering:** Polis gathers and analyzes opinions from large groups of people in real-time.
@@ -129,9 +153,3 @@ then been accessed by other UI widget through other API endpoints
       FastAPI-_R__-->|output|Streamlit-display;
 ```
 *storage: Such as Amazon S3, Google Cloud Storage, Azure Blob Storage, and other S3-compatible storage
-
-The `Streamlit` is just a placeholder and a test UI for development, `FastAPI` can generate SDK in `Python`, `Android` and `TypeScript` using OpenAPI generator. And the `FastAPI-_R__` will be replaced by an API gateway to allow people implement different ways to analyzing data in the `StarRock` datalake and serve through Micro Service architecture and access through RESTful API URL standard.
-
-### Detailed docs
-- [API docs](https://github.com/NewJerseyStyle/LitePolis/tree/release/doc/api)
-- [data dictionary](doc/database.md)
