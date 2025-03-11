@@ -17,14 +17,49 @@ LitePolis is a modular Python-based system, refactored from [Polis](https://gith
 Routers and middleware can be developed independently in separate repositories and integrated during deployment based on the dependencies declared by UI packages.  This allows for a highly modular and extensible system.
 
 ```mermaid
-graph LR
-    A[LitePolis Core] --> B(Package Manager);
-    B --> C{Routers (APIs)};
-    B --> D{Middlewares};
-    B --> E{UI Packages};
-    C --> F[Database Access (as a Router/API)];
-    F -.-> G[Auto pull Docker (Future)];
-    E --> H[Static Files];
+graph TD
+    subgraph "Local Development Environment"
+        CLI[LitePolis CLI]
+        PM[Package Manager]
+        CF[Static Config File]
+    end
+
+    subgraph "Package Sources"
+        PYPI[PyPI Repository]
+        GH[GitHub Templates]
+    end
+
+    subgraph "Ray Cluster Deployment"
+        RAY[Ray Cluster]
+        SERVE[Ray Serve]
+        MON[Ray Dashboard/Monitoring]
+        
+        subgraph "Application Components"
+            API[FastAPI Application]
+            R[Router Services]
+            M[Middleware Services]
+            UI[UI Static Files]
+        end
+    end
+
+    subgraph "Database Layer"
+        SR[(StarRocks Data Lakehouse)]
+    end
+
+    CLI -->|User Commands| PM
+    PM -->|Read/Write| CF
+    PM -->|Install Dependencies| PYPI
+    
+    PM -->|Deploy Application| SERVE
+    SERVE -->|Run| API
+    API -->|Include| R
+    API -->|Apply| M
+    API -->|Serve| UI
+    
+    R <-->|Query/Store Data| SR
+    
+    RAY -->|Monitor| MON
+    SERVE -.->|Part of| RAY
 ```
 
 **Routers, UI Packages, and Middlewares**
@@ -37,6 +72,39 @@ In LitePolis, these components play distinct roles, though their relationship to
 
 * **Middlewares:** These components sit between the routers and the UI, acting as intermediaries. They handle cross-cutting concerns like authentication, authorization, logging, and rate limiting.  They are not directly tied to the MVC paradigm but are essential for managing access control, security, and other system-wide functionalities.  Thinking of them as handling access control is a reasonable simplification.
 
+```mermaid
+graph TD
+    subgraph "LitePolis Core"
+        PM[Package Manager] --> DP[Dependency Resolution]
+        PM --> CP[Component Discovery]
+        PM --> ORC[Orchestration]
+    end
+
+    subgraph "Component Types"
+        R[Routers/APIs] --> RA[API Endpoints]
+        R --> RC[Request Handling]
+        R --> RDB[Database Access Router]
+        
+        M[Middlewares] --> MA[Authentication]
+        M --> MB[Authorization]
+        M --> MC[Logging]
+        M --> MD[Rate Limiting]
+        
+        UI[UI Packages] --> UIA[Static Files]
+        UI --> UIB[User Interface]
+    end
+
+    PM --> R
+    PM --> M
+    PM --> UI
+    
+    R --> RDB
+    RDB -.-> DK[Docker Containers]
+    
+    UI --> DPC[Dependencies Declaration]
+    DPC --> PM    
+```
+
 **Scalability and Infrastructure**
 
 LitePolis is designed for scalability and can handle high-volume usage through horizontal scaling:
@@ -46,6 +114,16 @@ LitePolis is designed for scalability and can handle high-volume usage through h
 * **Model (Database and Data Processing):**  LitePolis leverages distributed databases and data processing systems (like [StarRocks on Kubernetes](https://github.com/StarRocks/starrocks-kubernetes-operator/tree/main/examples/starrocks)) that can scale horizontally to handle increasing data volumes and query loads.
 
 This distributed architecture, combined with cloud infrastructure and autoscaling, allows LitePolis to adapt to varying levels of demand and maintain performance even under heavy load, enabling nation-wide high-volume usage.
+
+```mermaid
+graph TD
+    subgraph "Scalability"
+        SCALE[Scalable Architecture] --> LB[Load Balancing]
+        SCALE --> CDN[Content Delivery Network]
+        SCALE --> DB[Distributed Database]
+        SCALE --> AS[Auto Scaling]
+    end
+```
 
 ## Conclusion
 
